@@ -163,19 +163,30 @@ POWEREDBiSeq = function(rd,
                         RRBSMatrix, 
                         meanDiff, 
                         pheno = FALSE, 
-                        nSampleNeeded = 2, 
-                        optimalSearchNPerm = 40000){
+                        nSampleNeeded = 2){
   
   ## Check that scale of RRBS data and mean difference are proportions not percentages
   meanDiff = meanDiff*100
   nSamples = (ncol(RRBSMatrix)-1)/2 
   covCols = (nSamples+2):ncol(RRBSMatrix)
   
-  ## set nPerm parameters for each subsetting
-  nPermPrior = 100000 ## must be bigger than nPermR
-  nPermCpGRD = 60000
-  nPermR = 60000
-  nPermrdTrue = 60000
+  ## set nPerm parameters for each subsetting (cannot be larger than number of rows in data)
+  ifelse(nrow(RRBSMatrix) <40000,  
+         optimalSearchNPerm = nrow(RRBSMatrix),  
+         optimalSearchNPerm = 40000)
+  ifelse(nrow(RRBSMatrix) <100000, 
+         nPermPrior = nrow(RRBSMatrix),
+         nPermPrior = 100000) ## must be bigger or equal to nPermR
+  ifelse(nrow(RRBSMatrix) <60000, {
+    nPermCpGRD = nrow(RRBSMatrix)
+    nPermR = nrow(RRBSMatrix)
+    nPermrdTrue = nrow(RRBSMatrix)
+  },{
+    nPermCpGRD = 60000
+    nPermR = 60000
+    nPermrdTrue = 60000
+  })
+
   
   if(nSampleNeeded < 2){
     return("nSampleNeeded must be greater than 2")          
